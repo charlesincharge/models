@@ -57,9 +57,9 @@ The nested dictionary is the DATA DICTIONARY, which has the following keys:
   underlying firing rates, there is the 'conversion_factor' key.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 
 import numpy as np
@@ -348,7 +348,7 @@ class LFADS(object):
     self.ext_inputs = ext_inputs = None
 
     if len(dataset_names) == 1:  # single session
-      if 'alignment_matrix_cxf' in datasets[dataset_names[0]].keys():
+      if 'alignment_matrix_cxf' in list(datasets[dataset_names[0]].keys()):
         used_in_factors_dim = factors_dim
         in_identity_if_poss = False
       else:
@@ -364,7 +364,7 @@ class LFADS(object):
       in_bias_1xf = None
       align_bias_1xc = None
 
-      if datasets and 'alignment_matrix_cxf' in datasets[name].keys():
+      if datasets and 'alignment_matrix_cxf' in list(datasets[name].keys()):
         dataset = datasets[name]
         if hps.do_train_readin:
             print("Initializing trainable readin matrix with alignment matrix" \
@@ -378,7 +378,7 @@ class LFADS(object):
           (data_dim x factors_dim), but currently has %d x %d."""%
                            (data_dim, factors_dim, in_mat_cxf.shape[0],
                             in_mat_cxf.shape[1]))
-      if datasets and 'alignment_bias_c' in datasets[name].keys():
+      if datasets and 'alignment_bias_c' in list(datasets[name].keys()):
         dataset = datasets[name]
         if hps.do_train_readin:
           print("Initializing trainable readin bias with alignment bias " \
@@ -426,11 +426,11 @@ class LFADS(object):
       for d, name in enumerate(dataset_names):
         data_dim = hps.dataset_dims[name]
         in_mat_cxf = None
-        if datasets and 'alignment_matrix_cxf' in datasets[name].keys():
+        if datasets and 'alignment_matrix_cxf' in list(datasets[name].keys()):
           dataset = datasets[name]
           in_mat_cxf = dataset['alignment_matrix_cxf'].astype(np.float32)
 
-        if datasets and 'alignment_bias_c' in datasets[name].keys():
+        if datasets and 'alignment_bias_c' in list(datasets[name].keys()):
           dataset = datasets[name]
           align_bias_c = dataset['alignment_bias_c'].astype(np.float32)
           align_bias_1xc = np.expand_dims(align_bias_c, axis=0)
@@ -485,10 +485,10 @@ class LFADS(object):
         fns_out_fac_Ws[d] = makelambda(out_fac_W)
         fns_out_fac_bs[d] =  makelambda(out_fac_b)
 
-    pf_pairs_in_fac_Ws = zip(preds, fns_in_fac_Ws)
-    pf_pairs_in_fac_bs = zip(preds, fns_in_fac_bs)
-    pf_pairs_out_fac_Ws = zip(preds, fns_out_fac_Ws)
-    pf_pairs_out_fac_bs = zip(preds, fns_out_fac_bs)
+    pf_pairs_in_fac_Ws = list(zip(preds, fns_in_fac_Ws))
+    pf_pairs_in_fac_bs = list(zip(preds, fns_in_fac_bs))
+    pf_pairs_out_fac_Ws = list(zip(preds, fns_out_fac_Ws))
+    pf_pairs_out_fac_bs = list(zip(preds, fns_out_fac_bs))
 
     this_in_fac_W = tf.case(pf_pairs_in_fac_Ws, exclusive=True)
     this_in_fac_b = tf.case(pf_pairs_in_fac_bs, exclusive=True)
@@ -534,10 +534,10 @@ class LFADS(object):
       """
       if forward_or_reverse == "forward":
         dstr = "_fwd"
-        time_fwd_or_rev = range(num_steps_to_encode)
+        time_fwd_or_rev = list(range(num_steps_to_encode))
       else:
         dstr = "_rev"
-        time_fwd_or_rev = reversed(range(num_steps_to_encode))
+        time_fwd_or_rev = reversed(list(range(num_steps_to_encode)))
 
       with tf.variable_scope(name+"_enc"+dstr, reuse=False):
         enc_state = tf.tile(
@@ -949,7 +949,7 @@ class LFADS(object):
     self.grads = grads
     self.grad_global_norm = grad_global_norm
     self.train_op = opt.apply_gradients(
-        zip(grads, tvars), global_step=self.train_step)
+        list(zip(grads, tvars)), global_step=self.train_step)
 
     self.seso_saver = tf.train.Saver(tf.global_variables(),
                                      max_to_keep=hps.max_ckpt_to_keep)
@@ -1112,7 +1112,7 @@ class LFADS(object):
       #bmrem_examples = np.zeros(bmrem, dtype=np.int32)
       ridxs = np.random.permutation(nexamples)[0:bmrem].astype(np.int32)
       bmrem_examples = np.sort(ridxs)
-    example_idxs = range(nexamples) + list(bmrem_examples)
+    example_idxs = list(range(nexamples)) + list(bmrem_examples)
     example_idxs_e_x_edivb = np.reshape(example_idxs, [-1, batch_size])
     return example_idxs_e_x_edivb, bmrem
 
@@ -1133,9 +1133,9 @@ class LFADS(object):
     bmrem = batch_size - nexamples % batch_size
     bmrem_examples = []
     if bmrem < batch_size:
-      bmrem_examples = np.random.choice(range(nexamples),
+      bmrem_examples = np.random.choice(list(range(nexamples)),
                                         size=bmrem, replace=False)
-    example_idxs = range(nexamples) + list(bmrem_examples)
+    example_idxs = list(range(nexamples)) + list(bmrem_examples)
     mixed_example_idxs = np.random.permutation(example_idxs)
     example_idxs_e_x_edivb = np.reshape(mixed_example_idxs, [-1, batch_size])
     return example_idxs_e_x_edivb, bmrem
@@ -1211,7 +1211,7 @@ class LFADS(object):
     epoch_idxs = {}
     all_name_example_idx_pairs = []
     kind_data = kind + '_data'
-    for name, data_dict in datasets.items():
+    for name, data_dict in list(datasets.items()):
       nexamples, ntime, data_dim = data_dict[kind_data].shape
       epoch_idxs[name] = 0
       random_example_idxs, _ = \
@@ -1219,7 +1219,7 @@ class LFADS(object):
 
       epoch_size = random_example_idxs.shape[0]
       names = [name] * epoch_size
-      all_name_example_idx_pairs += zip(names, random_example_idxs)
+      all_name_example_idx_pairs += list(zip(names, random_example_idxs))
 
     np.random.shuffle(all_name_example_idx_pairs) # shuffle in place
 
@@ -1398,7 +1398,7 @@ class LFADS(object):
 
     """
     hps = self.hps
-    all_data_names = datasets.keys()
+    all_data_names = list(datasets.keys())
     data_name = np.random.permutation(all_data_names)[0]
     data_dict = datasets[data_name]
     has_valid_set = True if data_dict['valid_data'] is not None else False
@@ -1484,7 +1484,7 @@ class LFADS(object):
     """
     hps = self.hps
     has_any_valid_set = False
-    for data_dict in datasets.values():
+    for data_dict in list(datasets.values()):
       if data_dict['valid_data'] is not None:
         has_any_valid_set = True
         break
@@ -1984,7 +1984,7 @@ class LFADS(object):
     hps = self.hps
     kind = hps.kind
 
-    for data_name, data_dict in datasets.items():
+    for data_name, data_dict in list(datasets.items()):
       data_tuple = [('train', data_dict['train_data'],
                      data_dict['train_ext_input']),
                     ('valid', data_dict['valid_data'],
@@ -2124,7 +2124,7 @@ class LFADS(object):
     if not use_nested:
       return vars_dict
 
-    var_names = vars_dict.keys()
+    var_names = list(vars_dict.keys())
     nested_vars_dict = {}
     current_dict = nested_vars_dict
     for v, var_name in enumerate(var_names):

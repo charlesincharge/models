@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 # ==============================================================================
-from __future__ import print_function
+
 
 import h5py
 import numpy as np
@@ -78,7 +78,7 @@ def get_data_batch(batch_size, T, rng, u_std):
   u_bxt = rng.randn(batch_size, T) * u_std
   running_sum_b = np.zeros([batch_size])
   labels_bxt = np.zeros([batch_size, T])
-  for t in xrange(T):
+  for t in range(T):
     running_sum_b += u_bxt[:, t]
     labels_bxt[:, t] += running_sum_b
   labels_bxt = np.clip(labels_bxt, -1, 1)
@@ -135,7 +135,7 @@ with tf.Session() as sess:
     u_1xt, outs_1xt = get_data_batch(batch_size, ntimesteps, u_rng, FLAGS.u_std)
 
     feed_dict = {}
-    for t in xrange(ntimesteps):
+    for t in range(ntimesteps):
       feed_dict[inputs_ph_t[t]] = np.reshape(u_1xt[:,t], (batch_size,-1))
 
     states_t_bxn, outputs_t_bxn = sess.run([states_t, outputs_t],
@@ -144,7 +144,7 @@ with tf.Session() as sess:
     outputs_t_bxn = np.squeeze(np.asarray(outputs_t_bxn))
     r_sxt = np.dot(P_nxn, states_nxt)
 
-    for s in xrange(nreplications):
+    for s in range(nreplications):
       data_e.append(r_sxt)
       u_e.append(u_1xt)
       outs_e.append(outputs_t_bxn)

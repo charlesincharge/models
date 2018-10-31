@@ -13,9 +13,9 @@
 # limitations under the License.
 #
 # ==============================================================================
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 from lfads import LFADS
 import numpy as np
@@ -490,7 +490,7 @@ def jsonify_dict(d):
     else:
       return "false"
 
-  for key in d2.keys():
+  for key in list(d2.keys()):
     if isinstance(d2[key], bool):
       d2[key] = jsonify_bool(d2[key])
   return d2
@@ -665,9 +665,9 @@ def write_model_samples(hps, datasets, dataset_name=None, output_fname=None):
   else:
     output_fname = output_fname + "model_runs_" + hps.kind
   if not dataset_name:
-    dataset_name = datasets.keys()[0]
+    dataset_name = list(datasets.keys())[0]
   else:
-    if dataset_name not in datasets.keys():
+    if dataset_name not in list(datasets.keys()):
       raise ValueError("Invalid dataset name '%s'."%(dataset_name))
   model = build_model(hps, kind=hps.kind, datasets=datasets)
   model.write_model_samples(dataset_name, output_fname)
@@ -738,7 +738,7 @@ def load_datasets(data_dir, data_filename_stem):
   """
   print("Reading data from ", data_dir)
   datasets = utils.read_datasets(data_dir, data_filename_stem)
-  for k, data_dict in datasets.items():
+  for k, data_dict in list(datasets.items()):
     datasets[k] = clean_data_dict(data_dict)
 
     train_total_size = len(data_dict['train_data'])
@@ -780,7 +780,7 @@ def main(_):
 
   # also store down the dimensionality of the data
   # - just pull from one set, required to be same for all sets
-  hps.num_steps = datasets.values()[0]['num_steps']
+  hps.num_steps = list(datasets.values())[0]['num_steps']
   hps.ndatasets = len(hps.dataset_names)
 
   if hps.num_steps_for_gen_ic > hps.num_steps:
