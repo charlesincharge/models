@@ -565,7 +565,7 @@ class LFADS(object):
     # Encode initial condition means and variances
     # ([x_T, x_T-1, ... x_0] and [x_0, x_1, ... x_T] -> g0/c0)
     self.ic_enc_fwd = [None] * num_steps
-    self.ic_enc_rev = [None] * num_steps
+    # self.ic_enc_rev = [None] * num_steps
     if ic_dim > 0:
       enc_ic_cell = cell_class(hps.ic_enc_dim,
                                weight_scale=hps.cell_weight_scale,
@@ -573,16 +573,16 @@ class LFADS(object):
       ic_enc_fwd = encode_data(dataset_do_bxtxd, enc_ic_cell,
                                "ic", "forward",
                                hps.num_steps_for_gen_ic)
-      ic_enc_rev = encode_data(dataset_do_bxtxd, enc_ic_cell,
-                               "ic", "reverse",
-                               hps.num_steps_for_gen_ic)
+      # ic_enc_rev = encode_data(dataset_do_bxtxd, enc_ic_cell,
+      #                          "ic", "reverse",
+      #                          hps.num_steps_for_gen_ic)
       self.ic_enc_fwd = ic_enc_fwd
-      self.ic_enc_rev = ic_enc_rev
+      # self.ic_enc_rev = ic_enc_rev
 
     # Encoder control input means and variances, bi-directional encoding so:
     # ([x_T, x_T-1, ..., x_0] and [x_0, x_1 ... x_T] -> u_t)
     self.ci_enc_fwd = [None] * num_steps
-    self.ci_enc_rev = [None] * num_steps
+    # self.ci_enc_rev = [None] * num_steps
     if co_dim > 0:
       enc_ci_cell = cell_class(hps.ci_enc_dim,
                                weight_scale=hps.cell_weight_scale,
@@ -590,14 +590,15 @@ class LFADS(object):
       ci_enc_fwd = encode_data(dataset_do_bxtxd, enc_ci_cell,
                                "ci", "forward",
                                hps.num_steps)
-      if hps.do_causal_controller:
-        ci_enc_rev = None
-      else:
-        ci_enc_rev = encode_data(dataset_do_bxtxd, enc_ci_cell,
-                                 "ci", "reverse",
-                                 hps.num_steps)
+      ci_enc_rev = None
+      # if hps.do_causal_controller:
+      #   ci_enc_rev = None
+      # else:
+      #   ci_enc_rev = encode_data(dataset_do_bxtxd, enc_ci_cell,
+      #                            "ci", "reverse",
+      #                            hps.num_steps)
       self.ci_enc_fwd = ci_enc_fwd
-      self.ci_enc_rev = ci_enc_rev
+      # self.ci_enc_rev = ci_enc_rev
 
     # STOCHASTIC LATENT VARIABLES, priors and posteriors
     # (initial conditions g0, and control inputs, u_t)
@@ -613,7 +614,8 @@ class LFADS(object):
                                       var_min=hps.ic_prior_var_min,
                                       var_init=hps.ic_prior_var_scale,
                                       var_max=hps.ic_prior_var_max)
-        ic_enc = tf.concat(axis=1, values=[ic_enc_fwd[-1], ic_enc_rev[0]])
+        # ic_enc = tf.concat(axis=1, values=[ic_enc_fwd[-1], ic_enc_rev[0]])
+        ic_enc = tf.concat(axis=1, values=[ic_enc_fwd[-1]])
         ic_enc = tf.nn.dropout(ic_enc, keep_prob)
         self.posterior_zs_g0 = \
             DiagonalGaussianFromInput(ic_enc, ic_dim, "ic_enc_2_post_g0",
@@ -727,7 +729,8 @@ class LFADS(object):
           con_in_f_t = tf.zeros_like(ci_enc_fwd[0])
         else:
           con_in_f_t = ci_enc_fwd[tlag]
-        if hps.do_causal_controller:
+        # if hps.do_causal_controller:
+        if True:
           # If controller is causal (wrt to data generation process), then it
           # cannot see future data.  Thus, excluding ci_enc_rev[t] is obvious.
           # Less obvious is the need to exclude factors[t-1].  This arises
@@ -739,12 +742,13 @@ class LFADS(object):
           con_in_list_t = [con_in_f_t]
         else:
           tlag_rev = t + hps.controller_input_lag
-          if tlag_rev >= num_steps:
-            # better than zeros
-            con_in_r_t = tf.zeros_like(ci_enc_rev[0])
-          else:
-            con_in_r_t = ci_enc_rev[tlag_rev]
-          con_in_list_t = [con_in_f_t, con_in_r_t]
+          # if tlag_rev >= num_steps:
+          #   # better than zeros
+          #   con_in_r_t = tf.zeros_like(ci_enc_rev[0])
+          # else:
+          #   con_in_r_t = ci_enc_rev[tlag_rev]
+          # con_in_list_t = [con_in_f_t, con_in_r_t]
+          con_in_list_t = [con_in_f_t]
 
         if hps.do_feed_factors_to_controller:
           if hps.feedback_factors_or_rates == "factors":
