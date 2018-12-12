@@ -621,6 +621,7 @@ def write_model_runs(hps, datasets, output_fname=None, push_mean=False):
     The generator states for all time.
     The factors for all time.
     The rates for all time.
+    # TODO: why are rates not saved?
 
   Args:
     hps: The dictionary of hyperparameters.

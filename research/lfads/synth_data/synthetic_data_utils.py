@@ -126,14 +126,17 @@ def normalize_rates(data_e, E, S):
 
 
 def spikify_data(data_e, rng, dt=1.0, max_firing_rate=100):
-  """ Apply spikes to a continuous dataset whose values are between 0.0 and 1.0
+  """ Generate spikes from a list of spiking rates, whose values are normalized to between 0.0 and 1.0
   Args:
-    data_e: nexamples length list of NxT trials
+    data_e: nexamples length list of NxT trials (array with continuous values)
+    rng: numpy.random.RandomState (random number generator)
     dt: how often the data are sampled
     max_firing_rate: the firing rate that is associated with a value of 1.0
   Returns:
-    spikified_e: a list of length b of the data represented as spikes,
+    spikified_e: a list of length b of the data represented as spikes, 
     sampled from the underlying poisson process.
+    same size as data_e
+    Each element of the list is the number of spikes observed/generated in that time bin of width dt.
     """
 
   E = len(data_e)

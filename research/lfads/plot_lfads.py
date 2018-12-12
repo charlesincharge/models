@@ -53,7 +53,7 @@ def all_plot(d, full_name="", exclude="", nspaces=0):
 
 
 def plot_time_series(vals_bxtxn, bidx=None, n_to_plot=np.inf, scale=1.0,
-                     color='r', title=None):
+                     color='r', title=None, channels_to_plot=None):
 
   if bidx is None:
     vals_txn = np.mean(vals_bxtxn, axis=0)
@@ -61,10 +61,14 @@ def plot_time_series(vals_bxtxn, bidx=None, n_to_plot=np.inf, scale=1.0,
     vals_txn = vals_bxtxn[bidx,:,:]
 
   T, N = vals_txn.shape
-  if n_to_plot > N:
-    n_to_plot = N
+  if channels_to_plot:
+    n_to_plot = len(channels_to_plot)
+  else:
+    if n_to_plot > N:
+      n_to_plot = N
+    channels_to_plot = list(range(n_to_plot))
 
-  plt.plot(vals_txn[:,0:n_to_plot] + scale*np.array(list(range(n_to_plot))),
+  plt.plot(vals_txn[:,np.array(channels_to_plot)] + scale*np.array(list(range(n_to_plot))),
            color=color, lw=1.0)
   plt.axis('tight')
   if title:
@@ -81,10 +85,13 @@ def plot_lfads_timeseries(data_bxtxn, model_vals, ext_input_bxtxi=None,
   nrows = 7
   plt.subplot(nrows,2,1+subplot_cidx)
 
+  # `interesting_channel_idxes` is different for different days
+  # interesting_channel_idxes = [6, 9, 11, 20, 21, 22, 27, 28, 38, 51, 54, 57, 59, 63, 64]
+  interesting_channel_idxes = None
   if output_dist == 'poisson':
     rates = means = conversion_factor * model_vals['output_dist_params']
     plot_time_series(rates, bidx, n_to_plot=n_to_plot, scale=scale,
-                     title=col_title + " rates (LFADS - red, Truth - black)")
+                     title=col_title + " rates (LFADS - red, Truth - black), interesting channels",channels_to_plot=interesting_channel_idxes)
   elif output_dist == 'gaussian':
     means_vars = model_vals['output_dist_params']
     means, vars = np.split(means_vars,2, axis=2) # bxtxn
@@ -119,8 +126,10 @@ def plot_lfads_timeseries(data_bxtxn, model_vals, ext_input_bxtxi=None,
   plt.subplot(nrows,2,5+subplot_cidx)
   plot_time_series(means, bidx,
                    n_to_plot=n_to_plot, scale=1.0,
-                   title=col_title + " Spikes (LFADS - red, Spikes - black)")
-  plot_time_series(data_bxtxn, bidx, n_to_plot=n_to_plot, color='k', scale=1.0)
+                   title=col_title + " Spikes (LFADS - red, Spikes - black), interesting channels",
+                   channels_to_plot=interesting_channel_idxes)
+  plot_time_series(data_bxtxn, bidx, n_to_plot=n_to_plot, color='k', scale=1.0,
+                   channels_to_plot=interesting_channel_idxes)
 
   plt.subplot(nrows,2,7+subplot_cidx)
   plot_time_series(model_vals['factors'], bidx, n_to_plot=n_to_plot, color='b',

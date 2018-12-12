@@ -133,11 +133,15 @@ for n in range(ndatasets):
   else:
     input_times = None
 
+  # Generates training and validation data together
+  # (How do we get 4000? That's what E is)
   rates, x0s, inputs = \
       generate_data(rnn, T=T, E=E, x0s=x0s, P_sxn=P_sxn,
                     input_magnitude=input_magnitude,
                     input_times=input_times)
 
+  import pdb; pdb.set_trace()
+  # Convert continuous spiking rates into dt-binned spikes
   if FLAGS.noise_type == "poisson":
     noisy_data = spikify_data(rates, rng, rnn['dt'], rnn['max_firing_rate'])
   elif FLAGS.noise_type == "gaussian":
@@ -145,7 +149,7 @@ for n in range(ndatasets):
   else:
     raise ValueError("Only noise types supported are poisson or gaussian")
 
-    # split into train and validation sets
+    # split into training and validation sets
   train_inds, valid_inds = get_train_n_valid_inds(E, train_percentage,
                                                   nreplications)
 

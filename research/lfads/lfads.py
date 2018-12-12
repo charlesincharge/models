@@ -1,3 +1,4 @@
+
 # Copyright 2017 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -1022,7 +1023,17 @@ class LFADS(object):
     self.merged_valid = tf.summary.merge_all(key="valid_summaries")
 
     session = tf.get_default_session()
-    self.logfile = os.path.join(hps.lfads_save_dir, "lfads_log")
+    self.logfile = os.path.join(hps.lfads_save_dir,
+      "lfads_log_F{factors_dim}_N{gen_dim}_ICD{ic_dim}_ICED{ic_enc_dim}_BS{batch_size}_WIS{weight_increase_steps}_KP{keep_prob}_LTWO{l2_cost}".format(
+        factors_dim=hps.factors_dim,
+        gen_dim=hps.gen_dim,
+        ic_dim=hps.ic_dim,
+        ic_enc_dim=hps.ic_enc_dim,
+        batch_size=hps.batch_size,
+        weight_increase_steps=hps.l2_increase_steps,
+        keep_prob=hps.keep_prob,
+        l2_cost=hps.l2_gen_scale,
+      ))
     self.writer = tf.summary.FileWriter(self.logfile)
 
   def build_feed_dict(self, train_name, data_bxtxd, ext_input_bxtxi=None,
