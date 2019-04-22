@@ -140,7 +140,6 @@ for n in range(ndatasets):
                     input_magnitude=input_magnitude,
                     input_times=input_times)
 
-  import pdb; pdb.set_trace()
   # Convert continuous spiking rates into dt-binned spikes
   if FLAGS.noise_type == "poisson":
     noisy_data = spikify_data(rates, rng, rnn['dt'], rnn['max_firing_rate'])
